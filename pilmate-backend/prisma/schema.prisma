@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODULE 1: USERS & MULTI-TENANCY
+// ============================================
+
+model Store {
+  id               BigInt   @id @default(autoincrement())
+  storeOwnerUserId BigInt?  @map("store_owner_user_id")
+  storeName        String   @map("store_name")
+  storeAddress     String?  @map("store_address")
+  licenseNumber    BigInt?  @map("license_number")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  owner          User?               @relation("StoreOwner", fields: [storeOwnerUserId], references: [id])
+  members        StoreMember[]
+  categories     Category[]
+  medicines      Medicine[]
+  batches        InventoryBatch[]
+  suppliers      Supplier[]
+  purchaseOrders PurchaseOrder[]
+  priceHistory   PriceHistory[]
+  dailySales     DailySales[]
+  activityLogs   ActivityLog[]
+
+  @@map("Store")
+}
+
+model Role {
+  id       BigInt        @id @default(autoincrement())
+  roleName String        @map("role_name")
+  users    User[]
+  members  StoreMember[]
+
+  @@map("role")
+}
+
+model User {
+  id           BigInt    @id @default(autoincrement())
+  fullName     String    @map("full_name")
+  addresss     String?   @map("addresss")
+  email        String    @unique
+  dateOfBirth  DateTime? @map("date_of_birth") @db.Date
+  roleId       BigInt?   @map("role_id")
+  mobileNumber BigInt?   @map("mobile_number")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  role             Role?           @relation(fields: [roleId], references: [id])
+  ownedStores      Store[]         @relation("StoreOwner")
+  storeMemberships StoreMember[]
+  purchaseOrders   PurchaseOrder[]
+  priceChanges     PriceHistory[]
+  activityLogs     ActivityLog[]
+
+  @@map("User")
+}
+
+model StoreMember {
+  id               BigInt   @id @default(autoincrement())
+  storeId          BigInt   @map("store_id")
+  userId           BigInt   @map("user_id")
+  roleId           BigInt?  @map("role_id")
+  invitationStatus String?  @map("invitation_status") // Maps to VARCHAR(50)
+  invitedAt        DateTime @default(now()) @map("invited_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role  Role? @relation(fields: [roleId], references: [id])
+
+  @@map("store_members")
+}
+
+// ============================================
+// MODULE 2: INVENTORY & MEDICINES
+// ============================================
+
+model Category {
+  id      BigInt @id @default(autoincrement())
+  storeId BigInt @map("store_id")
+  name    String
+
+  store     Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  medicines Medicine[]
+
+  @@map("categories")
+}
+
+model Medicine {
+  id           BigInt  @id @default(autoincrement())
+  name         String
+  storeId      BigInt  @map("store_id")
+  categoryId   BigInt? @map("category_id")
+  genericName  String? @map("generic_name")
+  sku          String?
+  description  String?
+  dosageForm   String? @map("dosage_form")
+  reorderLevel BigInt  @default(10) @map("reorder_level")
+
+  store        Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  category     Category?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  batches      InventoryBatch[]
+  poItems      PurchaseOrderItem[]
+  priceHistory PriceHistory[]
+  dailySales   DailySales[]
+
+  @@map("medicine")
+}
+
+model InventoryBatch {
+  id              BigInt   @id @default(autoincrement())
+  storeId         BigInt   @map("store_id")
+  medicineId      BigInt   @map("medicine_id")
+  batchNumber     String   @map("batch_number")
+  quantity        BigInt   @default(0)
+  expiryDate      DateTime @map("expiry_date")
+  purchesPrice    BigInt   @map("purches_price")
+  sellingPrice    BigInt   @map("selling_price")
+  receivedDate    DateTime @default(now()) @map("received_date")
+  supplierId      BigInt?  @map("supplier_id")
+  status          String?  @map("status") // Maps to VARCHAR(50)
+
+  store    Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@map("inventory_batches")
+}
+
+// ============================================
+// MODULE 3: SUPPLY CHAIN & PROCUREMENT
+// ============================================
+
+model Supplier {
+  id            BigInt  @id @default(autoincrement())
+  storeId       BigInt  @map("store_id")
+  supplierName  String  @map("supplier_name")
+  contactPerson String? @map("contact_person")
+  phone         String?
+  email         String?
+  address       String?
+  tinNumber     String? @map("tin_number")
+  isActive      Boolean @default(true) @map("is_active")
+
+  store          Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  batches        InventoryBatch[]
+  purchaseOrders PurchaseOrder[]
+
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id          BigInt   @id @default(autoincrement())
+  storeId     BigInt   @map("store_id")
+  supplierId  BigInt?  @map("supplier_id")
+  userId      BigInt?  @map("user_id")
+  orderDate   DateTime @default(now()) @map("order_date")
+  status      String?  @map("status") // Maps to VARCHAR(50)
+  totalAmount BigInt   @default(0) @map("total_amount")
+  notes       String?
+
+  store    Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier Supplier?           @relation(fields: [supplierId], references: [id])
+  user     User?               @relation(fields: [userId], references: [id])
+  items    PurchaseOrderItem[]
+
+  @@map("purches_orders")
+}
+
+model PurchaseOrderItem {
+  id              BigInt @id @default(autoincrement())
+  pold            BigInt @map("pold") // Matching the 'pold' naming in your image
+  medicineId      BigInt @map("medicine_id")
+  quantityOrdered BigInt @map("quantity_ordered")
+  unitCost        BigInt @map("unit_cost")
+
+  purchaseOrder PurchaseOrder @relation(fields: [pold], references: [id], onDelete: Cascade)
+  medicine      Medicine      @relation(fields: [medicineId], references: [id])
+
+  @@map("purchase_order_item")
+}
+
+// ============================================
+// MODULE 4: LOGS & ANALYTICS
+// ============================================
+
+model PriceHistory {
+  id               BigInt   @id @default(autoincrement())
+  storeId          BigInt   @map("store_id")
+  medicineId       BigInt   @map("medicine_id")
+  oldPurchesPrice  Decimal? @map("old_purches_price") @db.Decimal(12, 2)
+  newPurchesPrice  Decimal? @map("new_purches_price") @db.Decimal(12, 2)
+  newSellingPrice  Decimal? @map("new_selling_price") @db.Decimal(12, 2)
+  changedByUserId  BigInt?  @map("changed_by_user_id")
+  reason           String?
+  changedAt        DateTime @default(now()) @map("changed_at")
+
+  store    Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [changedByUserId], references: [id])
+
+  @@map("price_history")
+}
+
+model DailySales {
+  id                   BigInt   @id @default(autoincrement())
+  storeId              BigInt   @map("store_id")
+  reportDate           DateTime @map("report_date")
+  totalSalesCount      Decimal? @map("total_sales_count") @db.Decimal(12, 2)
+  totalRevenue         Decimal? @map("total_revenue") @db.Decimal(12, 2)
+  totalProfit          Decimal? @map("total_profit") @db.Decimal(12, 2)
+  topSellingMedicineId BigInt?  @map("top_selling_medicine_id")
+
+  store              Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  topSellingMedicine Medicine? @relation(fields: [topSellingMedicineId], references: [id])
+
+  @@map("daily_sales")
+}
+
+model ActivityLog {
+  id          BigInt   @id @default(autoincrement())
+  storeId     BigInt   @map("store_id")
+  userId      BigInt?  @map("user_id")
+  action      String
+  performedAt DateTime @default(now()) @map("performed_at")
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
