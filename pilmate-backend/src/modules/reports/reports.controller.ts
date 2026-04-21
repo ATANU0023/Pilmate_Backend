@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, Request, UseGuards } from '@nestjs/commo
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SubscriptionGuard } from '../../common/guards/subscription.guard';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard, SubscriptionGuard)
 @Controller('stores/:storeId/reports')
@@ -9,6 +10,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('sales')
+  @ResponseMessage('Sales report generated successfully')
   async getSalesReport(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -19,11 +21,13 @@ export class ReportsController {
   }
 
   @Get('inventory')
+  @ResponseMessage('Inventory report generated successfully')
   async getInventoryReport(@Param('storeId') storeId: string, @Request() req) {
     return this.reportsService.getInventoryReport(storeId, req.user.userId);
   }
 
   @Get('top-selling')
+  @ResponseMessage('Top selling products report generated successfully')
   async getTopSelling(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -41,6 +45,7 @@ export class ReportsController {
   }
 
   @Get('dashboard')
+  @ResponseMessage('Dashboard stats fetched successfully')
   async getDashboard(@Param('storeId') storeId: string, @Request() req) {
     return this.reportsService.getDashboard(storeId, req.user.userId);
   }

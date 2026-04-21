@@ -12,6 +12,7 @@ import {
 import { PurchasesService } from './purchases.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SubscriptionGuard } from '../../common/guards/subscription.guard';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 import {
   CreatePurchaseOrderDto,
   UpdatePurchaseStatusDto,
@@ -24,6 +25,7 @@ export class PurchasesController {
   constructor(private readonly purchasesService: PurchasesService) {}
 
   @Post()
+  @ResponseMessage('Purchase order created successfully')
   async create(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -33,6 +35,7 @@ export class PurchasesController {
   }
 
   @Get()
+  @ResponseMessage('Purchase orders fetched successfully')
   async findAll(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -50,6 +53,7 @@ export class PurchasesController {
   }
 
   @Get(':poId')
+  @ResponseMessage('Purchase order details fetched successfully')
   async findOne(
     @Param('storeId') storeId: string,
     @Param('poId') poId: string,
@@ -59,6 +63,7 @@ export class PurchasesController {
   }
 
   @Patch(':poId/status')
+  @ResponseMessage('Purchase order status updated successfully')
   async updateStatus(
     @Param('storeId') storeId: string,
     @Param('poId') poId: string,
@@ -69,6 +74,7 @@ export class PurchasesController {
   }
 
   @Post(':poId/receive')
+  @ResponseMessage('Purchase order received successfully')
   async receive(
     @Param('storeId') storeId: string,
     @Param('poId') poId: string,

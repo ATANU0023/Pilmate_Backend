@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +21,12 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global logging interceptor
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  // Global interceptors
+  const reflector = app.get(Reflector);
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor(reflector),
+  );
 
   // CORS
   app.enableCors();

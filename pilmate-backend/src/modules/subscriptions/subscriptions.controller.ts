@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SubscribeDto } from './dto/subscription.dto';
 import { Public } from '../../common/decorators/public.decorator';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('subscriptions')
@@ -28,16 +29,19 @@ export class SubscriptionsController {
 
   @Public()
   @Get('plans')
+  @ResponseMessage('Subscription plans fetched successfully')
   async getPlans() {
     return this.subscriptionsService.getPlans();
   }
 
   @Get('my-plan/:storeId')
+  @ResponseMessage('Store subscription fetched successfully')
   async getMyPlan(@Param('storeId') storeId: string) {
     return this.subscriptionsService.getStoreSubscription(storeId);
   }
 
   @Post('subscribe/:storeId')
+  @ResponseMessage('Subscription initialized successfully')
   async subscribe(
     @Param('storeId') storeId: string,
     @Body() dto: SubscribeDto,
@@ -47,6 +51,7 @@ export class SubscriptionsController {
 
   @Public()
   @Post('webhooks/razorpay')
+  @ResponseMessage('Webhook processed successfully')
   async handleRazorpayWebhook(
     @Request() req: any,
     @Headers('x-razorpay-signature') signature: string,

@@ -12,6 +12,7 @@ import { SalesService } from './sales.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { SubscriptionGuard } from '../../common/guards/subscription.guard';
 import { CreateSaleDto, QuerySalesDto } from './dto/sale.dto';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard, SubscriptionGuard)
 @Controller('stores/:storeId/sales')
@@ -19,6 +20,7 @@ export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
   @Post()
+  @ResponseMessage('Sale transaction completed successfully')
   async create(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -28,6 +30,7 @@ export class SalesController {
   }
 
   @Get()
+  @ResponseMessage('Sales history fetched successfully')
   async findAll(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -37,6 +40,7 @@ export class SalesController {
   }
 
   @Get(':invoiceId')
+  @ResponseMessage('Invoice details fetched successfully')
   async findOne(
     @Param('storeId') storeId: string,
     @Param('invoiceId') invoiceId: string,

@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ResponseMessage('Profile fetched successfully')
   async getProfile(@Request() req) {
     return this.authService.getProfile(req.user.userId);
   }

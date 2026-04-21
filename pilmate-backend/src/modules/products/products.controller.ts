@@ -16,6 +16,7 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateMedicineDto, UpdateMedicineDto, QueryMedicineDto } from './dto/medicine.dto';
 import { CreateBatchDto, UpdateBatchDto } from './dto/batch.dto';
 import { CreateSupplierDto, UpdateSupplierDto } from './dto/supplier.dto';
+import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('stores/:storeId/products')
@@ -25,6 +26,7 @@ export class ProductsController {
   // ---- Categories ----
 
   @Post('categories')
+  @ResponseMessage('Category created successfully')
   async createCategory(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -34,11 +36,13 @@ export class ProductsController {
   }
 
   @Get('categories')
+  @ResponseMessage('Categories fetched successfully')
   async findAllCategories(@Param('storeId') storeId: string, @Request() req) {
     return this.productsService.findAllCategories(storeId, req.user.userId);
   }
 
   @Patch('categories/:categoryId')
+  @ResponseMessage('Category updated successfully')
   async updateCategory(
     @Param('storeId') storeId: string,
     @Param('categoryId') categoryId: string,
@@ -49,6 +53,7 @@ export class ProductsController {
   }
 
   @Delete('categories/:categoryId')
+  @ResponseMessage('Category deleted successfully')
   async deleteCategory(
     @Param('storeId') storeId: string,
     @Param('categoryId') categoryId: string,
@@ -60,6 +65,7 @@ export class ProductsController {
   // ---- Medicines ----
 
   @Post('medicines')
+  @ResponseMessage('Medicine created successfully')
   async createMedicine(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -69,6 +75,7 @@ export class ProductsController {
   }
 
   @Get('medicines')
+  @ResponseMessage('Medicines fetched successfully')
   async findAllMedicines(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -78,6 +85,7 @@ export class ProductsController {
   }
 
   @Get('medicines/:medicineId')
+  @ResponseMessage('Medicine details fetched successfully')
   async findOneMedicine(
     @Param('storeId') storeId: string,
     @Param('medicineId') medicineId: string,
@@ -87,6 +95,7 @@ export class ProductsController {
   }
 
   @Patch('medicines/:medicineId')
+  @ResponseMessage('Medicine updated successfully')
   async updateMedicine(
     @Param('storeId') storeId: string,
     @Param('medicineId') medicineId: string,
@@ -97,6 +106,7 @@ export class ProductsController {
   }
 
   @Delete('medicines/:medicineId')
+  @ResponseMessage('Medicine deleted successfully')
   async deleteMedicine(
     @Param('storeId') storeId: string,
     @Param('medicineId') medicineId: string,
@@ -108,6 +118,7 @@ export class ProductsController {
   // ---- Batches ----
 
   @Post('medicines/:medicineId/batches')
+  @ResponseMessage('Batch added successfully')
   async addBatch(
     @Param('storeId') storeId: string,
     @Param('medicineId') medicineId: string,
@@ -118,6 +129,7 @@ export class ProductsController {
   }
 
   @Get('medicines/:medicineId/batches')
+  @ResponseMessage('Batches fetched successfully')
   async findBatches(
     @Param('storeId') storeId: string,
     @Param('medicineId') medicineId: string,
@@ -127,6 +139,7 @@ export class ProductsController {
   }
 
   @Patch('batches/:batchId')
+  @ResponseMessage('Batch updated successfully')
   async updateBatch(
     @Param('storeId') storeId: string,
     @Param('batchId') batchId: string,
@@ -139,11 +152,13 @@ export class ProductsController {
   // ---- Alerts ----
 
   @Get('low-stock')
+  @ResponseMessage('Low stock alerts fetched successfully')
   async getLowStock(@Param('storeId') storeId: string, @Request() req) {
     return this.productsService.getLowStockMedicines(storeId, req.user.userId);
   }
 
   @Get('expiring')
+  @ResponseMessage('Expiring product alerts fetched successfully')
   async getExpiring(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -159,6 +174,7 @@ export class ProductsController {
   // ---- Suppliers ----
 
   @Post('suppliers')
+  @ResponseMessage('Supplier created successfully')
   async createSupplier(
     @Param('storeId') storeId: string,
     @Request() req,
@@ -168,11 +184,13 @@ export class ProductsController {
   }
 
   @Get('suppliers')
+  @ResponseMessage('Suppliers fetched successfully')
   async findAllSuppliers(@Param('storeId') storeId: string, @Request() req) {
     return this.productsService.findAllSuppliers(storeId, req.user.userId);
   }
 
   @Get('suppliers/:supplierId')
+  @ResponseMessage('Supplier details fetched successfully')
   async findOneSupplier(
     @Param('storeId') storeId: string,
     @Param('supplierId') supplierId: string,
@@ -182,6 +200,7 @@ export class ProductsController {
   }
 
   @Patch('suppliers/:supplierId')
+  @ResponseMessage('Supplier updated successfully')
   async updateSupplier(
     @Param('storeId') storeId: string,
     @Param('supplierId') supplierId: string,
@@ -192,6 +211,7 @@ export class ProductsController {
   }
 
   @Delete('suppliers/:supplierId')
+  @ResponseMessage('Supplier deleted successfully')
   async deleteSupplier(
     @Param('storeId') storeId: string,
     @Param('supplierId') supplierId: string,
@@ -200,3 +220,4 @@ export class ProductsController {
     return this.productsService.deleteSupplier(storeId, supplierId, req.user.userId);
   }
 }
+
