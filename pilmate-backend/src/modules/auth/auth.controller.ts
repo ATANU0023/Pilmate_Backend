@@ -35,4 +35,12 @@ export class AuthController {
   async updateProfile(@Request() req, @Body() dto: UpdateProfileDto) {
     return this.authService.updateProfile(req.user.userId, dto);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @ResponseMessage('Logged out successfully')
+  async logout(@Request() req) {
+    const token = req.headers.authorization?.split(' ')[1];
+    return this.authService.logout(token);
+  }
 }

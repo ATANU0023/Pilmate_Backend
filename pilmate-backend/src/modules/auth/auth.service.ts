@@ -16,7 +16,7 @@ export class AuthService {
   ) {
     this.supabase = createClient(
       this.config.get<string>('SUPABASE_URL') || '',
-      this.config.get<string>('SUPABASE_ANON_KEY') || '',
+      this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY') || '',
     );
   }
 
@@ -194,6 +194,17 @@ export class AuthService {
         mobileNumber: user.mobileNumber,
         dateOfBirth: user.dateOfBirth,
       },
+    };
+  }
+
+  //logout
+  async logout(token: string) {
+    const { error } = await this.supabase.auth.admin.signOut(token);
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+    return {
+      message: 'Logout successful',
     };
   }
 }
