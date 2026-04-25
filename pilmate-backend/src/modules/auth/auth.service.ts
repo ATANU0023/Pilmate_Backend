@@ -16,7 +16,7 @@ export class AuthService {
   ) {
     this.supabase = createClient(
       this.config.get<string>('SUPABASE_URL') || '',
-      this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY') || '',
+      this.config.get<string>('SUPABASE_ANON_KEY') || '',
     );
   }
 
@@ -199,7 +199,12 @@ export class AuthService {
 
   //logout
   async logout(token: string) {
-    const { error } = await this.supabase.auth.admin.signOut(token);
+    const adminClient = createClient(
+      this.config.get<string>('SUPABASE_URL') || '',
+      this.config.get<string>('SUPABASE_SERVICE_ROLE_KEY') || '',
+    );
+
+    const { error } = await adminClient.auth.admin.signOut(token);
     if (error) {
       throw new BadRequestException(error.message);
     }
