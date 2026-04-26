@@ -19,6 +19,10 @@ import {
   ReceivePurchaseOrderDto,
 } from './dto/purchase.dto';
 
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+
+@ApiTags('purchases')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, SubscriptionGuard)
 @Controller('stores/:storeId/purchases')
 export class PurchasesController {

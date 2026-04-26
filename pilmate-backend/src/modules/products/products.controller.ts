@@ -18,6 +18,10 @@ import { CreateBatchDto, UpdateBatchDto } from './dto/batch.dto';
 import { CreateSupplierDto, UpdateSupplierDto } from './dto/supplier.dto';
 import { ResponseMessage } from '../../common/decorators/response-message.decorator';
 
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+
+@ApiTags('products')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('stores/:storeId/products')
 export class ProductsController {
